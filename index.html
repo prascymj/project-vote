@@ -123,12 +123,14 @@
 /* ==========================================================================
    CONFIG — วางลิงก์ Web App จาก Google Apps Script ตรงนี้ (ดู README.md)
    ========================================================================== */
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxi-Lwyfgr-ywZWYtenv1doXkjgY4ffXuvkhAMA-3Ur5gNPK9IlRK7kYmEdGTc4NIsK/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw-mMjTgI8HN6BHEz0gSwqhHJa2IuMaCnefArEGpFmPnhm1Pzk-SegRQ98A2yydyZo/exec";
 
 /* Project list — id ต้องไม่ซ้ำ และคงที่ (ห้ามเปลี่ยนภายหลัง เพราะใช้อ้างอิงในชีต) */
 const PROJECTS = [
   { id: "P01", name: "SATI" },
   { id: "P02", name: "MedLink" },
+  { id: "P34", name: "Herbal Detective" },
+  { id: "P35", name: "Knoti" },
   { id: "P03", name: "OunJai All Handled" },
   { id: "P04", name: "AI Smart Patrol Command" },
   { id: "P05", name: "War Point" },
@@ -137,10 +139,12 @@ const PROJECTS = [
   { id: "P08", name: "ProjectPulse AI" },
   { id: "P09", name: "InFocus" },
   { id: "P10", name: "Playground Intelligence" },
+  { id: "P36", name: "Local Story Hub" },
   { id: "P11", name: "NakMuay" },
   { id: "P12", name: "fitness to me" },
   { id: "P13", name: "แว่วเสียง ความห่วงใย" },
   { id: "P14", name: "Grant Receipt Assistant (GRA)" },
+  { id: "P37", name: "ShopPlus Global" },
   { id: "P15", name: "ALIGN" },
   { id: "P16", name: "Grade Runway" },
   { id: "P17", name: "Projexa" },
@@ -153,13 +157,18 @@ const PROJECTS = [
   { id: "P24", name: "JaiFit - Weight Loss Coach" },
   { id: "P25", name: "AI PERFUMERY ENGINE" },
   { id: "P26", name: "AI Disease Surveillance & Response Platform" },
+  { id: "P38", name: "Smart Contruction" },
   { id: "P27", name: "ST SaaS Platform" },
   { id: "P28", name: "Autopares" },
+  { id: "P39", name: "MONGKOL" },
   { id: "P29", name: "SMIS - Smart IV Monitoring System" },
   { id: "P30", name: "AI Life Admin" },
+  { id: "P40", name: "AI Life Admin (Video)" },
   { id: "P31", name: "TRACK NCD" },
+  { id: "P41", name: "YodPoong (ยอดพุ่ง)" },
   { id: "P32", name: "Cur Mate" },
-  { id: "P33", name: "เรียกรถซาเล้ง" }
+  { id: "P42", name: "FlowU" },
+  { id: "P43", name: "MFU AI Internship Transformation" }
 ];
 
 const NUM_PICKS = 5;
