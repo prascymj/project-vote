@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>โหวตโปรเจกต์ยอดนิยม (Top 5)</title>
+<style>
+  :root {
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --ink: #1e293b;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --brand: #4f46e5;
+    --brand-dark: #4338ca;
+    --ok: #16a34a;
+    --err: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Thai", Tahoma, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+    padding: 24px 14px 60px;
+  }
+  .wrap { max-width: 620px; margin: 0 auto; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 26px 24px;
+    box-shadow: 0 6px 24px rgba(15,23,42,.06);
+  }
+  h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 22px; font-size: .95rem; }
+  label { display: block; font-weight: 600; margin: 16px 0 6px; font-size: .92rem; }
+  .hint { font-weight: 400; color: var(--muted); font-size: .82rem; }
+  input, select {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 1rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--ink);
+    font-family: inherit;
+  }
+  input:focus, select:focus { outline: 2px solid var(--brand); border-color: var(--brand); }
+  .rank-row { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+  .rank-badge {
+    flex: 0 0 auto;
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: var(--brand);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 1rem;
+  }
+  .rank-row select { flex: 1; }
+  .divider { height: 1px; background: var(--line); margin: 24px 0; }
+  button {
+    width: 100%;
+    margin-top: 26px;
+    padding: 14px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #fff;
+    background: var(--brand);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  button:hover { background: var(--brand-dark); }
+  button:disabled { background: #a5b4fc; cursor: not-allowed; }
+  .msg { margin-top: 18px; padding: 14px 16px; border-radius: 10px; font-size: .95rem; display: none; }
+  .msg.show { display: block; }
+  .msg.ok { background: #dcfce7; color: var(--ok); border: 1px solid #86efac; }
+  .msg.err { background: #fee2e2; color: var(--err); border: 1px solid #fca5a5; }
+  .review { margin-top: 6px; font-size: .85rem; color: var(--muted); }
+  .success-box { text-align: center; padding: 20px 0; display: none; }
+  .success-box.show { display: block; }
+  .success-box .check { font-size: 3rem; }
+  ol.picks { margin: 14px 0 0; padding-left: 20px; text-align: left; }
+  ol.picks li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>🗳️ โหวตโปรเจกต์ยอดนิยม</h1>
+    <p class="sub">เลือกโปรเจกต์ที่คุณชอบที่สุด 5 อันดับ — โปรเจกต์ที่เลือกแล้วจะถูกตัดออกจากช่องอื่นโดยอัตโนมัติ</p>
+
+    <form id="voteForm" autocomplete="off">
+      <label for="email">อีเมล (Email) <span class="hint">*</span></label>
+      <input type="email" id="email" name="email" placeholder="you@example.com" required>
+
+      <label for="voterId">รหัส / ID <span class="hint">* เช่น รหัสนักศึกษา</span></label>
+      <input type="text" id="voterId" name="voterId" placeholder="6X12345678" required>
+
+      <div class="divider"></div>
+
+      <label>เลือก 5 อันดับ (Rank 1 = ชอบมากที่สุด)</label>
+      <div id="dropdowns"></div>
+
+      <button type="submit" id="submitBtn">ส่งคะแนนโหวต</button>
+    </form>
+
+    <div id="msg" class="msg"></div>
+
+    <div id="successBox" class="success-box">
+      <div class="check">✅</div>
+      <h1>บันทึกคะแนนเรียบร้อย!</h1>
+      <p class="sub">ขอบคุณสำหรับการโหวต 5 อันดับของคุณคือ:</p>
+      <ol id="finalPicks" class="picks"></ol>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==========================================================================
+   CONFIG — วางลิงก์ Web App จาก Google Apps Script ตรงนี้ (ดู README.md)
+   ========================================================================== */
+const WEB_APP_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+
+/* Project list — id ต้องไม่ซ้ำ และคงที่ (ห้ามเปลี่ยนภายหลัง เพราะใช้อ้างอิงในชีต) */
+const PROJECTS = [
+  { id: "P01", name: "SATI" },
+  { id: "P02", name: "MedLink" },
+  { id: "P03", name: "OunJai All Handled" },
+  { id: "P04", name: "AI Smart Patrol Command" },
+  { id: "P05", name: "War Point" },
+  { id: "P06", name: "AI SolarCopilot" },
+  { id: "P07", name: "ScentCraft Cozy App by SINE" },
+  { id: "P08", name: "ProjectPulse AI" },
+  { id: "P09", name: "InFocus" },
+  { id: "P10", name: "Playground Intelligence" },
+  { id: "P11", name: "NakMuay" },
+  { id: "P12", name: "fitness to me" },
+  { id: "P13", name: "แว่วเสียง ความห่วงใย" },
+  { id: "P14", name: "Grant Receipt Assistant (GRA)" },
+  { id: "P15", name: "ALIGN" },
+  { id: "P16", name: "Grade Runway" },
+  { id: "P17", name: "Projexa" },
+  { id: "P18", name: "Chira Continuity Care (Tripple C)" },
+  { id: "P19", name: "รักบ้าน@CNX" },
+  { id: "P20", name: "MALA RISK SCREENING" },
+  { id: "P21", name: "Balancer" },
+  { id: "P22", name: "SmartFit Daily" },
+  { id: "P23", name: "My Today" },
+  { id: "P24", name: "JaiFit - Weight Loss Coach" },
+  { id: "P25", name: "AI PERFUMERY ENGINE" },
+  { id: "P26", name: "AI Disease Surveillance & Response Platform" },
+  { id: "P27", name: "ST SaaS Platform" },
+  { id: "P28", name: "Autopares" },
+  { id: "P29", name: "SMIS - Smart IV Monitoring System" },
+  { id: "P30", name: "AI Life Admin" },
+  { id: "P31", name: "TRACK NCD" },
+  { id: "P32", name: "Cur Mate" },
+  { id: "P33", name: "เรียกรถซาเล้ง" }
+];
+
+const NUM_PICKS = 5;
+const container = document.getElementById("dropdowns");
+
+/* Build the 5 dropdowns */
+for (let i = 0; i < NUM_PICKS; i++) {
+  const row = document.createElement("div");
+  row.className = "rank-row";
+
+  const badge = document.createElement("div");
+  badge.className = "rank-badge";
+  badge.textContent = i + 1;
+
+  const sel = document.createElement("select");
+  sel.id = "pick" + i;
+  sel.required = true;
+  sel.dataset.index = i;
+  sel.addEventListener("change", refreshOptions);
+
+  row.appendChild(badge);
+  row.appendChild(sel);
+  container.appendChild(row);
+}
+
+const selects = Array.from(container.querySelectorAll("select"));
+
+function refreshOptions() {
+  const chosen = selects.map(s => s.value).filter(Boolean);
+  selects.forEach(sel => {
+    const current = sel.value;
+    // projects taken by OTHER dropdowns
+    const takenElsewhere = selects
+      .filter(s => s !== sel)
+      .map(s => s.value)
+      .filter(Boolean);
+
+    sel.innerHTML = "";
+    const ph = new Option("— เลือกโปรเจกต์ —", "");
+    ph.disabled = true;
+    if (!current) ph.selected = true;
+    sel.appendChild(ph);
+
+    PROJECTS.forEach(p => {
+      if (takenElsewhere.includes(p.id)) return; // filter out
+      const opt = new Option(p.name, p.id);
+      if (p.id === current) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  });
+}
+refreshOptions();
+
+/* Submit */
+const form = document.getElementById("voteForm");
+const msg = document.getElementById("msg");
+const submitBtn = document.getElementById("submitBtn");
+
+function showMsg(text, kind) {
+  msg.textContent = text;
+  msg.className = "msg show " + kind;
+}
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  msg.className = "msg";
+
+  const email = document.getElementById("email").value.trim();
+  const voterId = document.getElementById("voterId").value.trim();
+  const picks = selects.map(s => s.value);
+
+  if (!email || !voterId) { showMsg("กรุณากรอกอีเมลและรหัส", "err"); return; }
+  if (picks.some(p => !p)) { showMsg("กรุณาเลือกให้ครบทั้ง 5 อันดับ", "err"); return; }
+
+  const rows = picks.map((pid, idx) => {
+    const proj = PROJECTS.find(p => p.id === pid);
+    return { rank: idx + 1, email, voterId, projectId: pid, projectName: proj.name };
+  });
+
+  const payload = { submittedAt: new Date().toISOString(), email, voterId, picks: rows };
+
+  if (WEB_APP_URL.startsWith("PASTE_")) {
+    showMsg("⚠️ ยังไม่ได้ตั้งค่า WEB_APP_URL — ดูวิธีใน README.md", "err");
+    return;
+  }
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = "กำลังส่ง...";
+  try {
+    // text/plain = simple request (ไม่ trigger CORS preflight กับ Apps Script)
+    await fetch(WEB_APP_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+    // no-cors = อ่าน response ไม่ได้ ถือว่าสำเร็จถ้าไม่ throw
+    form.style.display = "none";
+    const box = document.getElementById("successBox");
+    const ol = document.getElementById("finalPicks");
+    ol.innerHTML = "";
+    rows.forEach(r => {
+      const li = document.createElement("li");
+      li.textContent = r.projectName + "  (" + r.projectId + ")";
+      ol.appendChild(li);
+    });
+    box.classList.add("show");
+  } catch (err) {
+    showMsg("ส่งไม่สำเร็จ: " + err.message + " — ลองใหม่อีกครั้ง", "err");
+    submitBtn.disabled = false;
+    submitBtn.textContent = "ส่งคะแนนโหวต";
+  }
+});
+</script>
+</body>
+</html>
